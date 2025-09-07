@@ -1,140 +1,289 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>每日提醒事项 · 自定义封面与背景</title>
+  <title>Daily Reminder</title>
   <style>
-    :root {
+    :root{
       --bg:#f6f7fb;
       --card:#ffffff;
       --text:#111;
       --muted:#666;
       --primary:#4caf50;
-      --danger:#e53935;
       --radius:14px;
       --shadow:0 6px 20px rgba(0,0,0,.08);
-      --footer-opacity:0.4;
     }
     *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.6;padding:24px}
+    body{margin:0;background:var(--bg);color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      line-height:1.6;padding:24px}
     .wrap{max-width:660px;margin:0 auto}
-    header{position:relative;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
-    .cover{height:200px;background:linear-gradient(135deg,#dfe9f3 0%, #ffffff 100%);display:flex;align-items:center;justify-content:center}
+    header{position:relative;background:var(--card);
+      border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+    .cover{height:200px;background:linear-gradient(135deg,#dfe9f3,#fff);
+      display:flex;align-items:center;justify-content:center}
     .cover img{width:100%;height:100%;object-fit:cover;display:block}
     h1{margin:0;padding:14px 18px 10px;font-size:22px}
-    main{margin-top:18px;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
-    .progress{margin:6px 0 14px;background:#ececec;border-radius:10px;overflow:hidden;height:18px}
-    .progress-bar{height:100%;width:0%;background:var(--primary);color:#fff;font-size:12px;text-align:center;transition:width .25s ease}
+    main{margin-top:18px;background:var(--card);border-radius:var(--radius);
+      box-shadow:var(--shadow);padding:18px}
     .stats{font-size:13px;color:var(--muted);margin-bottom:6px}
-    #taskList .task{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px dashed #eee}
+    .progress{margin:6px 0 14px;background:#ececec;border-radius:10px;
+      overflow:hidden;height:18px}
+    .progress-bar{height:100%;width:0%;background:var(--primary);
+      color:#fff;font-size:12px;text-align:center;transition:width .25s ease}
+    #taskList .task{display:flex;align-items:center;
+      justify-content:space-between;padding:10px 0;border-bottom:1px dashed #eee}
     #taskList .task:last-child{border-bottom:0}
     .task-left{display:flex;align-items:center;gap:10px}
     .task-title{font-size:16px}
-    .removeBtn{cursor:pointer;font-size:18px;color:#999;user-select:none}
+    .removeBtn{cursor:pointer;font-size:18px;color:#999}
     .removeBtn:hover{color:#000}
     .addTask{display:flex;margin-top:10px;gap:8px}
-    .addTask input{flex:1;padding:10px 12px;border:1px solid #ddd;border-radius:10px;font-size:15px}
+    .addTask input{flex:1;padding:10px 12px;border:1px solid #ddd;
+      border-radius:10px;font-size:15px}
+    .addTask .btn{min-width:84px}
     .quote{margin-top:12px;text-align:center;color:var(--muted);font-style:italic}
-    .completeMsg{display:none;text-align:center;margin-top:12px;font-weight:700;color:#2e7d32}
-    footer{margin-top:18px;text-align:center;color:#fff;font-size:12px;padding:16px;border-radius:0 0 14px 14px;background-size:cover;background-position:center;position:relative;overflow:hidden}
-    footer::before{content:"";position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,var(--footer-opacity));z-index:0}
-    footer *{position:relative;z-index:1}
-    /* 浮动按钮和面板 */
-    .fab{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;background:var(--primary);color:#fff;font-size:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,.2);z-index:999}
-    .settings-panel{position:fixed;bottom:90px;right:20px;width:260px;background:#fff;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.15);padding:16px;display:none;z-index:998}
+    .completeMsg{display:none;text-align:center;margin-top:12px;
+      font-weight:700;color:#2e7d32}
+    footer{margin-top:18px;text-align:center;color:#888;font-size:12px}
+
+    /* Floating button and settings panel */
+    .fab{position:fixed;right:20px;bottom:20px;width:56px;height:56px;
+      border-radius:50%;background:var(--primary);color:#fff;font-size:24px;
+      display:flex;align-items:center;justify-content:center;cursor:pointer;
+      box-shadow:0 4px 10px rgba(0,0,0,.2);z-index:999}
+    .settings-panel{position:fixed;right:20px;bottom:90px;width:280px;
+      background:#fff;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.15);
+      padding:16px;display:none;z-index:998}
     .settings-panel h3{margin:8px 0;font-size:15px;color:#333}
-    .settings-panel .btn{display:inline-block;margin:4px 2px;padding:6px 10px;font-size:13px;border-radius:8px;border:0;cursor:pointer}
-    .settings-panel input[type="file"]{display:none}
+    .settings-panel .btn{display:inline-block;margin:4px 2px;padding:6px 10px;
+      font-size:13px;border-radius:8px;border:0;cursor:pointer}
     .btn.primary{background:var(--primary);color:#fff}
     .btn.secondary{background:#eee;color:#111}
-    .slider{width:100%}
+    select{margin-top:4px;padding:4px}
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="cover" id="coverBox"><img id="coverImage" alt="" style="display:none" /></div>
-      <h1>每日提醒事项</h1>
-    </header>
-    <main>
-      <div class="stats" id="statsTxt">今日 0/0 已完成</div>
-      <div class="progress"><div class="progress-bar" id="progressBar">0%</div></div>
-      <div id="taskList"></div>
-      <div class="addTask">
-        <input id="newTaskInput" type="text" placeholder="输入新任务…" />
-        <button class="btn primary" id="addBtn">添加</button>
+      <div class="cover" id="coverBox">
+        <img id="coverImage" alt="cover" style="display:none" />
       </div>
-      <div class="completeMsg" id="completeMsg">🎉 今日任务全部完成！</div>
-      <div class="quote" id="dailyQuote">💡 今日寄语：加载中…</div>
+      <h1 id="title">Daily Reminder</h1>
+    </header>
+
+    <main>
+      <div class="stats" id="statsTxt">Today 0/0 completed</div>
+      <div class="progress"><div class="progress-bar" id="progressBar">0%</div></div>
+
+      <div id="taskList"></div>
+
+      <div class="addTask">
+        <input id="newTaskInput" type="text" placeholder="Enter new task…" />
+        <button class="btn primary" id="addBtn">Add</button>
+      </div>
+
+      <div class="completeMsg" id="completeMsg">🎉 All tasks completed!</div>
+      <div class="quote" id="dailyQuote">💡 Quote of the Day: Loading…</div>
     </main>
-    <footer id="footer">数据仅保存在此设备的浏览器本地 · 每天凌晨自动清空勾选</footer>
+
+    <footer id="footer">
+      Data is only stored locally in this browser · Daily reset at midnight
+    </footer>
   </div>
-  <!-- 浮动按钮和设置面板 -->
-  <div class="fab" id="fab">⚙</div>
+
+  <!-- Settings -->
+  <button class="fab" id="fab">⚙</button>
   <div class="settings-panel" id="settingsPanel">
-    <h3>封面设置</h3>
-    <label class="btn secondary" for="coverFile">选择封面</label>
+    <h3 id="coverSettings">Cover Settings</h3>
+    <label class="btn secondary" for="coverFile" id="selectCoverBtn">Select Cover</label>
     <input id="coverFile" type="file" accept="image/*" />
-    <button class="btn secondary" id="removeCoverBtn">移除封面</button>
-    <h3>底部背景设置</h3>
-    <label class="btn secondary" for="footerFile">选择背景</label>
-    <input id="footerFile" type="file" accept="image/*" />
-    <button class="btn secondary" id="removeFooterBg">移除背景</button>
-    <div style="margin-top:8px;">
-      <label>透明度：</label>
-      <input type="range" id="footerOpacity" class="slider" min="0" max="100" value="40">
-    </div>
+    <button class="btn secondary" id="removeCoverBtn">Remove Cover</button>
+
+    <h3 id="taskSettings">Task List</h3>
+    <button class="btn secondary" id="exportBtn">Export Tasks</button>
+    <button class="btn secondary" id="importBtn">Import Tasks</button>
+
+    <h3>Language / 语言</h3>
+    <select id="langSelect">
+      <option value="en">English</option>
+      <option value="zh">中文</option>
+    </select>
   </div>
 
   <script>
-    const KEY="dailyTasks_v2", KEY_DATE="lastResetDate", KEY_COVER="coverImageDataURL", KEY_QUOTE="dailyQuote";
-    const FOOTER_KEY="footerBgDataURL", FOOTER_OPACITY_KEY="footerBgOpacity";
+    const KEY="dailyTasks_v2",KEY_DATE="lastResetDate",KEY_COVER="coverImageDataURL",KEY_QUOTE="dailyQuote";
+
+    const i18n = {
+      en: {
+        title:"Daily Reminder",
+        add:"Add",
+        removeCover:"Remove Cover",
+        selectCover:"Select Cover",
+        stats:(d,t)=>`Today ${d}/${t} completed`,
+        completed:"🎉 All tasks completed!",
+        quote:"💡 Quote of the Day: ",
+        footer:"Data is only stored locally in this browser · Daily reset at midnight",
+        export:"Export Tasks",
+        import:"Import Tasks",
+        coverSettings:"Cover Settings",
+        taskSettings:"Task List"
+      },
+      zh: {
+        title:"每日提醒事项",
+        add:"添加",
+        removeCover:"移除封面",
+        selectCover:"选择封面",
+        stats:(d,t)=>`今日 ${d}/${t} 已完成`,
+        completed:"🎉 今日任务全部完成！",
+        quote:"💡 今日寄语：",
+        footer:"数据仅保存在此设备的浏览器本地 · 每天凌晨自动清空勾选",
+        export:"导出任务",
+        import:"导入任务",
+        coverSettings:"封面设置",
+        taskSettings:"任务清单"
+      }
+    };
+
     const quotes=["坚持就是胜利！","每一天都是新的开始。","小小的进步也是进步。","今天的努力会换来明天的成就。","保持微笑，继续前进。","你比自己想象的更强大。","失败只是成功的垫脚石。","相信自己，你能做到！","成功来自于每日的坚持。","未来属于努力的人。"];
+
     const els={
       coverImage:document.getElementById("coverImage"),
       coverFile:document.getElementById("coverFile"),
       removeCoverBtn:document.getElementById("removeCoverBtn"),
-      taskList:document.getElementById("taskList"),
-      newTaskInput:document.getElementById("newTaskInput"),
       addBtn:document.getElementById("addBtn"),
+      newTaskInput:document.getElementById("newTaskInput"),
+      taskList:document.getElementById("taskList"),
       progressBar:document.getElementById("progressBar"),
       completeMsg:document.getElementById("completeMsg"),
       dailyQuote:document.getElementById("dailyQuote"),
       statsTxt:document.getElementById("statsTxt"),
       footer:document.getElementById("footer"),
-      footerFile:document.getElementById("footerFile"),
-      removeFooterBg:document.getElementById("removeFooterBg"),
-      footerOpacity:document.getElementById("footerOpacity"),
+      exportBtn:document.getElementById("exportBtn"),
+      importBtn:document.getElementById("importBtn"),
       fab:document.getElementById("fab"),
-      settingsPanel:document.getElementById("settingsPanel")
+      settingsPanel:document.getElementById("settingsPanel"),
+      title:document.getElementById("title"),
+      selectCoverBtn:document.getElementById("selectCoverBtn"),
+      coverSettings:document.getElementById("coverSettings"),
+      taskSettings:document.getElementById("taskSettings"),
+      langSelect:document.getElementById("langSelect")
     };
 
     function todayKey(){return new Date().toDateString();}
     function loadData(){try{return JSON.parse(localStorage.getItem(KEY))||{tasks:[],checked:{}}}catch{return{tasks:[],checked:{}}}}
-    function saveData(data){localStorage.setItem(KEY,JSON.stringify(data));}
-    function resetIfNewDay(){const last=localStorage.getItem(KEY_DATE),today=todayKey();if(last!==today){const data=loadData();data.checked={};saveData(data);localStorage.setItem(KEY_DATE,today);const q=quotes[Math.floor(Math.random()*quotes.length)];localStorage.setItem(KEY_QUOTE,q);}}
+    function saveData(d){localStorage.setItem(KEY,JSON.stringify(d));}
+
+    // Reset daily
+    function resetIfNewDay(){
+      const last=localStorage.getItem(KEY_DATE),today=todayKey();
+      if(last!==today){
+        const d=loadData();d.checked={};saveData(d);
+        localStorage.setItem(KEY_DATE,today);
+        const q=quotes[Math.floor(Math.random()*quotes.length)];
+        localStorage.setItem(KEY_QUOTE,q);
+        updateProgress();
+      }
+    }
     setInterval(resetIfNewDay,60000);
 
-    function loadCover(){const url=localStorage.getItem(KEY_COVER);if(url){els.coverImage.src=url;els.coverImage.style.display="block"}else{els.coverImage.removeAttribute("src");els.coverImage.style.display="none"}}
-    els.coverFile.addEventListener("change",e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{localStorage.setItem(KEY_COVER,ev.target.result);loadCover()};r.readAsDataURL(f);e.target.value=""});
+    // Cover
+    function loadCover(){
+      const url=localStorage.getItem(KEY_COVER);
+      if(url){els.coverImage.src=url;els.coverImage.style.display="block";}
+      else{els.coverImage.style.display="none";}
+    }
+    els.coverFile.addEventListener("change",e=>{
+      const f=e.target.files[0];if(!f)return;
+      const r=new FileReader();
+      r.onload=ev=>{localStorage.setItem(KEY_COVER,ev.target.result);loadCover();};
+      r.readAsDataURL(f);e.target.value="";
+    });
     els.removeCoverBtn.addEventListener("click",()=>{localStorage.removeItem(KEY_COVER);loadCover();});
 
-    function loadFooterBg(){const url=localStorage.getItem(FOOTER_KEY);els.footer.style.backgroundImage=url?`url(${url})`:"";const op=localStorage.getItem(FOOTER_OPACITY_KEY)||40;els.footerOpacity.value=op;document.documentElement.style.setProperty("--footer-opacity",op/100);}
-    els.footerFile.addEventListener("change",e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{localStorage.setItem(FOOTER_KEY,ev.target.result);loadFooterBg()};r.readAsDataURL(f);e.target.value=""});
-    els.removeFooterBg.addEventListener("click",()=>{localStorage.removeItem(FOOTER_KEY);loadFooterBg();});
-    els.footerOpacity.addEventListener("input",e=>{const v=e.target.value;localStorage.setItem(FOOTER_OPACITY_KEY,v);document.documentElement.style.setProperty("--footer-opacity",v/100);});
+    // Tasks
+    function updateProgress(){
+      const d=loadData(),t=d.tasks.length,done=d.tasks.filter(x=>d.checked[x]).length;
+      const p=t===0?0:Math.round(done/t*100);
+      els.progressBar.style.width=p+"%";els.progressBar.textContent=p+"%";
+      els.statsTxt.textContent=currentLang.stats(done,t);
+      els.completeMsg.style.display=(t>0&&done===t)?"block":"none";
+    }
+    function renderTasks(){
+      const d=loadData();els.taskList.innerHTML="";
+      d.tasks.forEach(task=>{
+        const row=document.createElement("div");row.className="task";
+        const left=document.createElement("div");left.className="task-left";
+        const box=document.createElement("input");box.type="checkbox";box.checked=!!d.checked[task];
+        box.addEventListener("change",()=>{d.checked[task]=box.checked;saveData(d);updateProgress();});
+        const label=document.createElement("div");label.className="task-title";label.textContent=task;
+        left.appendChild(box);left.appendChild(label);
+        const del=document.createElement("span");del.className="removeBtn";del.textContent="✕";del.addEventListener("click",()=>{
+          d.tasks=d.tasks.filter(t=>t!==task);delete d.checked[task];saveData(d);renderTasks();updateProgress();
+        });
+        row.appendChild(left);row.appendChild(del);els.taskList.appendChild(row);
+      });
+      updateProgress();
+    }
+    function addTask(){
+      const v=els.newTaskInput.value.trim();if(!v)return;
+      const d=loadData();
+      if(!d.tasks.includes(v)){d.tasks.push(v);saveData(d);els.newTaskInput.value="";renderTasks();}
+    }
+    els.addBtn.addEventListener("click",addTask);
+    els.newTaskInput.addEventListener("keydown",e=>{if(e.key==="Enter")addTask();});
 
-    function updateProgress(){const d=loadData();const t=d.tasks.length;const done=d.tasks.filter(x=>d.checked[x]).length;const p=t===0?0:Math.round(done/t*100);els.progressBar.style.width=p+"%";els.progressBar.textContent=p+"%";els.statsTxt.textContent=`今日 ${done}/${t} 已完成`;els.completeMsg.style.display=(t>0&&done===t)?"block":"none";}
-    function renderTasks(){const d=loadData();els.taskList.innerHTML="";d.tasks.forEach(task=>{const row=document.createElement("div");row.className="task";const left=document.createElement("div");left.className="task-left";const box=document.createElement("input");box.type="checkbox";box.checked=!!d.checked[task];box.addEventListener("change",()=>{d.checked[task]=box.checked;saveData(d);updateProgress();});const label=document.createElement("div");label.className="task-title";label.textContent=task;left.appendChild(box);left.appendChild(label);const del=document.createElement("span");del.className="removeBtn";del.textContent="✕";del.addEventListener("click",()=>{d.tasks=d.tasks.filter(t=>t!==task);delete d.checked[task];saveData(d);renderTasks();updateProgress();});row.appendChild(left);row.appendChild(del);els.taskList.appendChild(row);});updateProgress();}
-    els.addBtn.addEventListener("click",addTask);els.newTaskInput.addEventListener("keydown",e=>{if(e.key==="Enter")addTask();});
-    function addTask(){const v=els.newTaskInput.value.trim();if(!v)return;const d=loadData();if(!d.tasks.includes(v)){d.tasks.push(v);saveData(d);els.newTaskInput.value="";renderTasks();}}
-    function loadQuote(){const q=localStorage.getItem(KEY_QUOTE)||quotes[0];els.dailyQuote.textContent="💡 今日寄语："+q;}
+    // Export/Import
+    els.exportBtn.addEventListener("click",()=>{
+      const d=loadData();const payload=JSON.stringify({tasks:d.tasks},null,2);
+      if(navigator.clipboard){navigator.clipboard.writeText(payload).then(()=>alert("Copied:\n\n"+payload));}
+      else alert("Tasks JSON:\n\n"+payload);
+    });
+    els.importBtn.addEventListener("click",()=>{
+      const txt=prompt("Paste tasks JSON:");if(!txt)return;
+      try{const obj=JSON.parse(txt);
+        if(Array.isArray(obj.tasks)){const d=loadData();d.tasks=[...new Set(obj.tasks)];d.checked={};saveData(d);renderTasks();updateProgress();}
+      }catch{alert("Invalid format");}
+    });
 
-    // FAB 开关
+    // Quote
+    function loadQuote(){
+      const q=localStorage.getItem(KEY_QUOTE)||quotes[0];
+      els.dailyQuote.textContent=currentLang.quote+q;
+    }
+
+    // Language
+    let currentLang=i18n[localStorage.getItem("lang")||"en"];
+    function applyLang(lang){
+      currentLang=i18n[lang];
+      localStorage.setItem("lang",lang);
+      document.title=currentLang.title;
+      els.title.textContent=currentLang.title;
+      els.addBtn.textContent=currentLang.add;
+      els.removeCoverBtn.textContent=currentLang.removeCover;
+      els.selectCoverBtn.textContent=currentLang.selectCover;
+      els.exportBtn.textContent=currentLang.export;
+      els.importBtn.textContent=currentLang.import;
+      els.coverSettings.textContent=currentLang.coverSettings;
+      els.taskSettings.textContent=currentLang.taskSettings;
+      els.footer.textContent=currentLang.footer;
+      els.completeMsg.textContent=currentLang.completed;
+      updateProgress();
+      loadQuote();
+    }
+    els.langSelect.value=localStorage.getItem("lang")||"en";
+    els.langSelect.addEventListener("change",e=>applyLang(e.target.value));
+
+    // Settings panel
     els.fab.addEventListener("click",()=>{els.settingsPanel.style.display=els.settingsPanel.style.display==="block"?"none":"block";});
 
-    (function init(){resetIfNewDay();localStorage.setItem(KEY_DATE,todayKey());loadCover();renderTasks();loadQuote();loadFooterBg();})();
+    (function init(){
+      resetIfNewDay();
+      localStorage.setItem(KEY_DATE,todayKey());
+      loadCover();renderTasks();loadQuote();
+      applyLang(localStorage.getItem("lang")||"en");
+    })();
   </script>
 </body>
 </html>
