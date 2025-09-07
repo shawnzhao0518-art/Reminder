@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>每日提醒事项</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f5f5f5; padding:20px; }
+    h1 { text-align:center; }
+    .task { margin:10px 0; display:flex; align-items:center; justify-content:space-between; }
+    .task input[type="checkbox"] { margin-right:10px; }
+    .container { max-width:400px; margin:0 auto; background:white; padding:20px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
+    .addTask { display:flex; margin-top:20px; }
+    .addTask input { flex:1; padding:6px; }
+    .addTask button { padding:6px 12px; margin-left:5px; }
+    .removeBtn { margin-left:10px; color:red; cursor:pointer; }
+    .progress { margin:15px 0; background:#eee; border-radius:5px; overflow:hidden; height:20px; }
+    .progress-bar { height:100%; width:0%; background:#4caf50; text-align:center; color:white; font-size:12px; transition: width 0.3s; }
+    .completeMsg { display:none; text-align:center; margin-top:15px; font-size:16px; font-weight:bold; color:#2e7d32; }
+    .quote { margin-top:20px; text-align:center; font-size:14px; font-style:italic; color:#555; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>每日提醒事项</h1>
+    <div class="progress"><div class="progress-bar" id="progressBar">0%</div></div>
+    <div id="taskList"></div>
+    <div class="addTask">
+      <input id="newTaskInput" type="text" placeholder="输入新任务..." />
+      <button onclick="addTask()">添加</button>
+    </div>
+    <div class="completeMsg" id="completeMsg">🎉 今日任务全部完成！</div>
+    <div class="quote" id="dailyQuote"></div>
+  </div>
+
+  <script>
+    const taskList = document.getElementById("taskList");
+    const progressBar = document.getElementById("progressBar");
+    const completeMsg = document.getElementById("completeMsg");
+    const dailyQuote = document.getElementById("dailyQuote");
+    let savedData = JSON.parse(localStorage.getItem("dailyTasks")) || { tasks: [], checked: {} };
+    const lastReset = localStorage.getItem("lastResetDate");
+    const today = new Date().toDateString();
+
+    // 励志语句库
+    const quotes = [
+      "坚持就是胜利！",
+      "每一天都是新的开始。",
+      "小小的进步也是进步。",
+      "今天的努力会换来明天的成就。",
+      "保持微笑，继续前进。",
+      "你比自己想象的更强大。",
+      "失败只是成功的垫脚石。",
+      "相信自己，你能做到！",
+      "成功来自于每日的坚持。",
+      "未来属于努力的人。"
+    ];
+
+    // 如果日期不同，清空勾选并更新每日语句
+    if (lastReset !== today) {
+      savedData.checked = {};
+      localStorage.setItem("lastResetDate", today);
+      localStorage.setItem("dailyTasks", JSON.stringify(savedData));
+      // 随机选择语句
+      const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+      localStorage.setItem("dailyQuote", randomQuote);
+    }
+
+    // 显示每日语句
+    const quoteOfTheDay = localStorage.getItem("dailyQuote") || quotes[0];
+    dailyQuote.textContent = "💡 今日寄语：" + quoteOfTheDay;
+
+    function updateProgress() {
+      const total = savedData.tasks.length;
+      const done = savedData.tasks.filter(t => savedData.checked[t]).length;
+      const percent = total === 0 ? 0 : Math.round((done / total) * 100);
+      progressBar.style.width = percent + "%";
+      progressBar.textContent = percent + "%";
+
+      if (total > 0 && done === total) {
+        completeMsg.style.display = "block";
+      } else {
+        completeMsg.style.display = "none";
+      }
+    }
+
+    function renderTasks() {
+      taskList.innerHTML = "";
+      savedData.tasks.forEach(task => {
+        const div = document.createElement("div");
+        div.className = "task";
+        const left = document.createElement("div");
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.checked = savedData.checked[task] || false;
+        input.addEventListener("change", () => {
+          savedData.checked[task] = input.checked;
+          saveData();
+          updateProgress();
+        });
+        left.appendChild(input);
+        left.appendChild(document.createTextNode(task));
+        div.appendChild(left);
+
+        const remove = document.createElement("span");
+        remove.className = "removeBtn";
+        remove.textContent = "✕";
+        remove.onclick = () => {
+          savedData.tasks = savedData.tasks.filter(t => t !== task);
+          delete savedData.checked[task];
+          saveData();
+          renderTasks();
+          updateProgress();
+        };
+        div.appendChild(remove);
+
+        taskList.appendChild(div);
+      });
+      updateProgress();
+    }
+
+    function addTask() {
+      const input = document.getElementById("newTaskInput");
+      const task = input.value.trim();
+      if (task && !savedData.tasks.includes(task)) {
+        savedData.tasks.push(task);
+        saveData();
+        renderTasks();
+      }
+      input.value = "";
+    }
+
+    function saveData() {
+      localStorage.setItem("dailyTasks", JSON.stringify(savedData));
+    }
+
+    renderTasks();
+  </script>
+</body>
+</html>
